@@ -1,5 +1,8 @@
 package net.chen.rapidBan.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum PunishmentType {
     BAN("永久封禁"),
     TEMPBAN("临时封禁"),
@@ -12,10 +15,6 @@ public enum PunishmentType {
 
     PunishmentType(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
     }
 
     public boolean isBan() {

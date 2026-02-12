@@ -1,5 +1,6 @@
 package net.chen.rapidBan.database;
 
+import lombok.Getter;
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.enums.PunishmentType;
 import net.chen.rapidBan.models.Punishment;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class PunishmentRepository {
+    @Getter
     private final RapidBan plugin;
     private final DatabaseManager database;
 

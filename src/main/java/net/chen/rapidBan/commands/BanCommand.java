@@ -2,12 +2,12 @@ package net.chen.rapidBan.commands;
 
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.enums.PunishmentType;
-import net.chen.rapidBan.models.Punishment;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             } else if (args[i].equalsIgnoreCase("-s")) {
                 silentTemp = true;
             } else {
-                if (reasonBuilder.length() > 0) reasonBuilder.append(" ");
+                if (!reasonBuilder.isEmpty()) reasonBuilder.append(" ");
                 reasonBuilder.append(args[i]);
             }
         }
@@ -118,7 +118,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NonNull CommandSender sender, @NonNull Command command, @NonNull String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {

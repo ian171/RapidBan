@@ -4,11 +4,11 @@ import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.database.IPRepository;
 import net.chen.rapidBan.database.PunishmentRepository;
 import net.chen.rapidBan.models.IPRecord;
-import net.chen.rapidBan.models.Punishment;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class IPManager {
@@ -62,13 +62,13 @@ public class IPManager {
             for (IPRecord record : records) {
                 if (!record.getUuid().equals(excludeUuid)) {
                     CompletableFuture<Boolean> future = punishmentRepository.getActiveBan(record.getUuid())
-                        .thenApply(opt -> opt.isPresent());
+                        .thenApply(Optional::isPresent);
                     futures.add(future);
                 }
             }
 
             return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> futures.stream().anyMatch(f -> f.join()));
+                .thenApply(v -> futures.stream().anyMatch(CompletableFuture::join));
         });
     }
 

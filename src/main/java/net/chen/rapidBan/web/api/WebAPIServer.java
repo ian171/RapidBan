@@ -5,13 +5,11 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.enums.PunishmentType;
-import net.chen.rapidBan.models.Punishment;
 import net.chen.rapidBan.web.JWTManager;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class WebAPIServer {
     private final RapidBan plugin;

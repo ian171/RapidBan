@@ -1,6 +1,11 @@
 package net.chen.rapidBan;
 
-import net.chen.rapidBan.commands.*;
+import lombok.Getter;
+import lombok.Setter;
+import net.chen.rapidBan.commands.BanCommand;
+import net.chen.rapidBan.commands.HistoryCommand;
+import net.chen.rapidBan.commands.UnbanCommand;
+import net.chen.rapidBan.commands.UndoCommand;
 import net.chen.rapidBan.database.*;
 import net.chen.rapidBan.ip.IPManager;
 import net.chen.rapidBan.listeners.PlayerConnectionListener;
@@ -19,6 +24,8 @@ import java.sql.Statement;
 import java.util.UUID;
 import java.util.logging.Level;
 
+@Getter
+@Setter
 public final class RapidBan extends JavaPlugin {
 
     private DatabaseManager databaseManager;
@@ -153,28 +160,8 @@ public final class RapidBan extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(this), this);
     }
 
-    public String getServerId() {
-        return serverId;
-    }
-
-    public PunishmentManager getPunishmentManager() {
-        return punishmentManager;
-    }
-
     public IPManager getIPManager() {
         return ipManager;
-    }
-
-    public SyncManager getSyncManager() {
-        return syncManager;
-    }
-
-    public KickScreenManager getKickScreenManager() {
-        return kickScreenManager;
-    }
-
-    public PlayerRepository getPlayerRepository() {
-        return playerRepository;
     }
 
     public IPRepository getIPRepository() {

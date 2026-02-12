@@ -3,7 +3,9 @@ package net.chen.rapidBan.database;
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.models.Player;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 

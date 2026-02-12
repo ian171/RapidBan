@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.jspecify.annotations.NonNull;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,7 +75,7 @@ public class HistoryCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String @NonNull [] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             plugin.getServer().getOnlinePlayers().forEach(p -> completions.add(p.getName()));

@@ -1,7 +1,6 @@
 package net.chen.rapidBan.listeners;
 
 import net.chen.rapidBan.RapidBan;
-import net.chen.rapidBan.models.IPRecord;
 import net.chen.rapidBan.models.Player;
 import net.chen.rapidBan.models.Punishment;
 import org.bukkit.event.EventHandler;
@@ -9,8 +8,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-
-import java.util.List;
 
 public class PlayerConnectionListener implements Listener {
     private final RapidBan plugin;
