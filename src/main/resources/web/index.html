@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidBan - 管理面板</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>⚡ RapidBan</h2>
+                <p id="userInfo"></p>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="#" data-page="dashboard" class="active">📊 仪表盘</a></li>
+                <li><a href="#" data-page="players">👥 玩家管理</a></li>
+                <li><a href="#" data-page="punishments">⚖️ 处罚记录</a></li>
+                <li><a href="#" data-page="alts">🔗 关联账号</a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn btn-secondary">退出登录</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div id="dashboardPage" class="page active">
+                <h1>仪表盘</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>总处罚数</h3>
+                        <p class="stat-value" id="totalPunishments">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>活跃封禁</h3>
+                        <p class="stat-value" id="activeBans">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>今日处罚</h3>
+                        <p class="stat-value" id="todayPunishments">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>总玩家数</h3>
+                        <p class="stat-value" id="totalPlayers">-</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>最近处罚</h2>
+                    <div id="recentPunishments" class="table-container">
+                        <p class="loading">加载中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="playersPage" class="page">
+                <h1>玩家管理</h1>
+
+                <div class="action-bar">
+                    <input type="text" id="playerSearch" placeholder="搜索玩家..." class="search-input">
+                    <button id="searchBtn" class="btn btn-primary">搜索</button>
+                </div>
+
+                <div id="playerResult" class="section" style="display: none;">
+                    <h2>玩家信息</h2>
+                    <div id="playerInfo"></div>
+
+                    <div class="action-buttons">
+                        <button id="banPlayerBtn" class="btn btn-danger">封禁玩家</button>
+                        <button id="unbanPlayerBtn" class="btn btn-success">解封玩家</button>
+                        <button id="viewHistoryBtn" class="btn btn-primary">查看历史</button>
+                        <button id="revokeAllBtn" class="btn btn-warning">撤销所有处罚</button>
+                    </div>
+                </div>
+
+                <div id="playerHistory" class="section" style="display: none;">
+                    <h2>处罚历史</h2>
+                    <div id="historyList"></div>
+                </div>
+            </div>
+
+            <div id="punishmentsPage" class="page">
+                <h1>处罚记录</h1>
+                <p>功能开发中...</p>
+            </div>
+
+            <div id="altsPage" class="page">
+                <h1>关联账号检测</h1>
+                <p>功能开发中...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 封禁对话框 -->
+    <div id="banModal" class="modal">
+        <div class="modal-content">
+            <h2>封禁玩家</h2>
+            <form id="banForm">
+                <div class="form-group">
+                    <label for="banReason">封禁原因</label>
+                    <input type="text" id="banReason" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="banDuration">时长（留空为永久）</label>
+                    <select id="banDuration">
+                        <option value="">永久</option>
+                        <option value="3600000">1小时</option>
+                        <option value="86400000">1天</option>
+                        <option value="604800000">7天</option>
+                        <option value="2592000000">30天</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="banSilent">
+                        静默封禁（不广播）
+                    </label>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-danger">确认封禁</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('banModal')">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

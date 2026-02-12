@@ -1,0 +1,53 @@
+name: RapidBan
+version: '${version}'
+main: net.chen.rapidBan.RapidBan
+api-version: '1.21'
+author: Chen
+description: 企业级 Minecraft 惩罚管理系统
+
+commands:
+  ban:
+    description: 封禁玩家
+    usage: /ban <玩家> <原因> [-t <时长>] [-s]
+    permission: rapidban.ban
+  unban:
+    description: 解封玩家
+    usage: /unban <玩家>
+    permission: rapidban.unban
+  history:
+    description: 查看玩家处罚历史
+    usage: /history <玩家>
+    permission: rapidban.history
+  punishundo:
+    description: 撤销玩家所有处罚
+    usage: /punishundo <玩家> [原因]
+    permission: rapidban.undo
+
+permissions:
+  rapidban.*:
+    description: 所有 RapidBan 权限
+    children:
+      rapidban.ban: true
+      rapidban.unban: true
+      rapidban.history: true
+      rapidban.undo: true
+      rapidban.notify: true
+      rapidban.notify.alt: true
+  rapidban.ban:
+    description: 封禁玩家
+    default: op
+  rapidban.unban:
+    description: 解封玩家
+    default: op
+  rapidban.history:
+    description: 查看处罚历史
+    default: op
+  rapidban.undo:
+    description: 撤销处罚
+    default: op
+  rapidban.notify:
+    description: 接收处罚通知
+    default: op
+  rapidban.notify.alt:
+    description: 接收关联账号通知
+    default: op

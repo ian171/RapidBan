@@ -1,0 +1,51 @@
+# RapidBan 踢出界面配置
+# 支持 MiniMessage 格式
+
+screens:
+  ban: |
+    <red><bold>你已被永久封禁</bold></red>
+
+    <gray>原因: <white>{reason}</white></gray>
+    <gray>执行者: <white>{operator}</white></gray>
+    <gray>时间: <white>{date}</white></gray>
+
+    <gray>处罚ID: <white>#{id}</white></gray>
+
+    <dark_gray>如有异议，请联系管理员</dark_gray>
+
+  tempban: |
+    <yellow><bold>你已被临时封禁</bold></yellow>
+
+    <gray>原因: <white>{reason}</white></gray>
+    <gray>执行者: <white>{operator}</white></gray>
+    <gray>剩余时间: <white>{remaining}</white></gray>
+    <gray>解封时间: <white>{expires}</white></gray>
+
+    <gray>处罚ID: <white>#{id}</white></gray>
+
+    <dark_gray>如有异议，请联系管理员</dark_gray>
+
+  kick: |
+    <red><bold>你已被踢出服务器</bold></red>
+
+    <gray>原因: <white>{reason}</white></gray>
+    <gray>执行者: <white>{operator}</white></gray>
+
+    <gray>处罚ID: <white>#{id}</white></gray>
+
+  mute: |
+    <gold>你已被永久禁言</gold>
+
+    <gray>原因: <white>{reason}</white></gray>
+    <gray>执行者: <white>{operator}</white></gray>
+
+    <gray>处罚ID: <white>#{id}</white></gray>
+
+  tempmute: |
+    <gold>你已被临时禁言</gold>
+
+    <gray>原因: <white>{reason}</white></gray>
+    <gray>执行者: <white>{operator}</white></gray>
+    <gray>剩余时间: <white>{remaining}</white></gray>
+
+    <gray>处罚ID: <white>#{id}</white></gray>

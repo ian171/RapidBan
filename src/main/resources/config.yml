@@ -1,0 +1,61 @@
+# RapidBan Configuration File
+# 企业级 Minecraft 惩罚管理系统
+
+# 服务器标识（用于分布式同步）
+server-id: "server-1"
+
+# 数据库配置
+database:
+  # 数据库类型: MYSQL 或 SQLITE
+  type: "MYSQL"
+
+  # MySQL/MariaDB 配置
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "rapidban"
+    username: "root"
+    password: "password"
+
+  # SQLite 配置（文件路径相对于插件数据文件夹）
+  sqlite:
+    file: "rapidban.db"
+
+# 同步系统配置
+sync:
+  # 同步间隔（秒）
+  interval-seconds: 5
+  # 使用 Redis 进行同步（如果为 false，使用数据库轮询）
+  use-redis: false
+  redis:
+    host: "localhost"
+    port: 6379
+    password: ""
+
+# IP 关联检测
+ip-check:
+  # 是否启用 IP 关联检测
+  enabled: true
+  # 是否自动封禁关联账号
+  auto-ban-alts: false
+  # 通知拥有权限的管理员
+  notify-staff: true
+
+# Web 管理面板
+web:
+  # 是否启用 Web API
+  enabled: true
+  # 监听地址
+  host: "0.0.0.0"
+  # 监听端口
+  port: 8080
+  # JWT 密钥（请修改为随机字符串）
+  jwt-secret: "change-this-to-a-random-secret-key"
+  # 管理员账号
+  admin-username: "admin"
+  admin-password: "admin123"
+
+# 自动任务
+tasks:
+  # 检查过期处罚的间隔（分钟）
+  check-expired-interval: 5
