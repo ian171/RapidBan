@@ -38,15 +38,6 @@
 - 执行封禁/解封操作
 - 搜索玩家和关联账号
 
-## 安装
-
-1. 下载 `RapidBan-1.0-Beta1.jar`
-2. 放入服务器 `plugins` 目录
-3. 启动服务器生成配置文件
-4. 编辑 `config.yml` 选择数据库类型：
-   - **SQLite** - 适合单服务器，无需额外配置
-   - **MySQL** - 适合多服务器网络，需配置数据库连接
-5. 重启服务器
 
 ### 数据库选择
 
@@ -192,70 +183,7 @@ Content-Type: application/json
 }
 ```
 
-### API 端点
 
-所有 API 请求需要在 Header 中包含：
-```
-Authorization: Bearer <token>
-```
-
-#### 查看处罚历史
-```bash
-GET /api/punishments/history/:player
-```
-
-#### 封禁玩家
-```bash
-POST /api/punishments/ban
-Content-Type: application/json
-
-{
-  "player": "Player123",
-  "reason": "作弊",
-  "duration": 604800000,
-  "silent": false
-}
-```
-
-#### 解封玩家
-```bash
-POST /api/punishments/unban
-Content-Type: application/json
-
-{
-  "player": "Player123"
-}
-```
-
-#### 撤销处罚
-```bash
-POST /api/punishments/revoke
-Content-Type: application/json
-
-{
-  "player": "Player123",
-  "reason": "误封"
-}
-```
-
-## 数据库
-
-插件支持两种数据库类型：
-
-### SQLite
-- 自动创建 `rapidban.db` 文件
-- 适合单服务器部署
-- 无需额外配置
-
-### MySQL/MariaDB
-- 自动创建以下表：
-  - `rb_players` - 玩家信息
-  - `rb_punishments` - 处罚记录
-  - `rb_ip_history` - IP 登录历史
-  - `rb_sync_events` - 同步事件
-  - `rb_web_tokens` - Web 用户
-  - `rb_audit_log` - 审计日志
-- 支持多服务器分布式同步
 
 ## 性能优化
 
@@ -266,16 +194,6 @@ Content-Type: application/json
 - ✅ 批量查询优化
 - ✅ 自动清理过期数据
 
-## 技术栈
-
-- **Paper API** 1.21+
-- **HikariCP** - 数据库连接池
-- **MariaDB/MySQL** - 关系型数据库（可选）
-- **SQLite** - 嵌入式数据库（可选）
-- **Jedis** - Redis 客户端
-- **Javalin** - Web 框架
-- **JWT** - 身份验证
-- **Gson** - JSON 处理
 
 ## 开发
 
@@ -292,7 +210,7 @@ build/libs/RapidBan-1.0-Beta1.jar
 
 ## 许可证
 
-本项目仅供学习和研究使用。
+本项目基于GNU General Public License v3.0.
 
 ## 支持
 
