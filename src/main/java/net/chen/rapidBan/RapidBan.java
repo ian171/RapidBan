@@ -1,11 +1,13 @@
 package net.chen.rapidBan;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import net.chen.rapidBan.commands.BanCommand;
 import net.chen.rapidBan.commands.HistoryCommand;
 import net.chen.rapidBan.commands.UnbanCommand;
 import net.chen.rapidBan.commands.UndoCommand;
+import net.chen.rapidBan.core.SimpleConfig;
 import net.chen.rapidBan.database.*;
 import net.chen.rapidBan.ip.IPManager;
 import net.chen.rapidBan.listeners.PlayerConnectionListener;
@@ -23,6 +25,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Getter
 @Setter
@@ -33,7 +36,7 @@ public final class RapidBan extends JavaPlugin {
     private PlayerRepository playerRepository;
     private IPRepository ipRepository;
     private SyncRepository syncRepository;
-
+    private SimpleConfig simpleConfig;
     private PunishmentManager punishmentManager;
     private IPManager ipManager;
     private SyncManager syncManager;
@@ -41,36 +44,41 @@ public final class RapidBan extends JavaPlugin {
     private WebAPIServer webAPIServer;
 
     private String serverId;
+    public static RapidBan instance;
+    public Logger logger;
 
     @Override
     public void onEnable() {
+        logger = this.getLogger();
+        instance = this;
         saveDefaultConfig();
+        simpleConfig =  new SimpleConfig(instance);
 
         serverId = getConfig().getString("server-id", "server-" + UUID.randomUUID().toString().substring(0, 8));
 
         getLogger().info("Starting RapidBan v" + getDescription().getVersion());
         getLogger().info("Server ID: " + serverId);
 
-        databaseManager = new DatabaseManager(this);
+        databaseManager = new DatabaseManager(instance);
 
         databaseManager.initialize().thenAccept(success -> {
             if (!success) {
                 getLogger().severe("Failed to initialize database! Plugin will be disabled.");
-                Bukkit.getPluginManager().disablePlugin(this);
+                Bukkit.getPluginManager().disablePlugin(instance);
                 return;
             }
 
             initializeDatabase();
 
-            punishmentRepository = new PunishmentRepository(this, databaseManager);
-            playerRepository = new PlayerRepository(this, databaseManager);
-            ipRepository = new IPRepository(this, databaseManager);
-            syncRepository = new SyncRepository(this, databaseManager);
+            punishmentRepository = new PunishmentRepository(instance, databaseManager);
+            playerRepository = new PlayerRepository(instance, databaseManager);
+            ipRepository = new IPRepository(instance, databaseManager);
+            syncRepository = new SyncRepository(instance, databaseManager);
 
-            punishmentManager = new PunishmentManager(this, punishmentRepository);
-            ipManager = new IPManager(this, ipRepository, punishmentRepository);
-            syncManager = new SyncManager(this, syncRepository);
-            kickScreenManager = new KickScreenManager(this);
+            punishmentManager = new PunishmentManager(instance, punishmentRepository);
+            ipManager = new IPManager(instance, ipRepository, punishmentRepository);
+            syncManager = new SyncManager(instance, syncRepository);
+            kickScreenManager = new KickScreenManager(instance);
 
             registerCommands();
             registerListeners();
@@ -145,25 +153,29 @@ public final class RapidBan extends JavaPlugin {
     }
 
     private void registerCommands() {
-        getCommand("ban").setExecutor(new BanCommand(this));
-        getCommand("unban").setExecutor(new UnbanCommand(this));
-        getCommand("history").setExecutor(new HistoryCommand(this));
-        getCommand("punishundo").setExecutor(new UndoCommand(this));
+        try {
+            getCommand("ban").setExecutor(new BanCommand(this));
+            getCommand("unban").setExecutor(new UnbanCommand(this));
+            getCommand("history").setExecutor(new HistoryCommand(this));
+            getCommand("punishundo").setExecutor(new UndoCommand(this));
 
-        getCommand("ban").setTabCompleter(new BanCommand(this));
-        getCommand("unban").setTabCompleter(new UnbanCommand(this));
-        getCommand("history").setTabCompleter(new HistoryCommand(this));
-        getCommand("punishundo").setTabCompleter(new UndoCommand(this));
+            getCommand("ban").setTabCompleter(new BanCommand(this));
+            getCommand("unban").setTabCompleter(new UnbanCommand(this));
+            getCommand("history").setTabCompleter(new HistoryCommand(this));
+            getCommand("punishundo").setTabCompleter(new UndoCommand(this));
+        } catch (NullPointerException e) {
+            logger.severe("未配置命令文件");
+        }
     }
 
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new PlayerConnectionListener(this), this);
     }
-
+    @NonNull
     public IPManager getIPManager() {
         return ipManager;
     }
-
+    @NonNull
     public IPRepository getIPRepository() {
         return ipRepository;
     }

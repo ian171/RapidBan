@@ -3,7 +3,8 @@
 
 # 服务器标识（用于分布式同步）
 server-id: "server-1"
-
+dev:
+  debug: false
 # 数据库配置
 database:
   # 数据库类型: MYSQL 或 SQLITE

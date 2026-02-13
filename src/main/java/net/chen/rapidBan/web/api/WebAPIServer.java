@@ -34,8 +34,10 @@ public class WebAPIServer {
 
         setupRoutes();
 
-        plugin.getLogger().info("Web API started on " + host + ":" + port);
-        plugin.getLogger().info("Web UI available at http://" + host + ":" + port + "/");
+        if (plugin.getSimpleConfig().isDebug) {
+            plugin.logger.info("Web API started on " + host + ":" + port);
+            plugin.logger.info("Web UI available at http://" + host + ":" + port + "/");
+        }
     }
 
     public void stop() {

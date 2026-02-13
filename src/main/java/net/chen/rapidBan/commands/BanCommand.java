@@ -1,7 +1,11 @@
 package net.chen.rapidBan.commands;
 
 import net.chen.rapidBan.RapidBan;
+import net.chen.rapidBan.core.events.PlayerBannedByConsoleEvent;
+import net.chen.rapidBan.core.events.PlayerBannedEvent;
 import net.chen.rapidBan.enums.PunishmentType;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -75,12 +79,18 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 .thenAccept(punishment -> {
                     if (!silent) {
                         plugin.getServer().broadcast(
-                            net.kyori.adventure.text.Component.text("§c" + targetName + " §7已被 §c" + operatorName + " §7封禁")
-                                .append(net.kyori.adventure.text.Component.text("\n§7原因: §f" + reason)),
+                            Component.text("§c" + targetName + " §7已被 §c" + operatorName + " §7封禁")
+                                .append(Component.text("\n§7原因: §f" + reason)),
                             "rapidban.notify"
                         );
                     }
-
+                    if(operatorName.equals("CONSOLE")){
+                        PlayerBannedByConsoleEvent event = new PlayerBannedByConsoleEvent((net.chen.rapidBan.models.Player) Bukkit.getPlayer(targetUuid));
+                        event.callEvent();
+                    }else {
+                        PlayerBannedEvent event = new PlayerBannedEvent((net.chen.rapidBan.models.Player) Bukkit.getPlayer(targetUuid));
+                        event.callEvent();
+                    }
                     sender.sendMessage("§a成功封禁玩家 " + targetName + " (ID: #" + punishment.getId() + ")");
 
                     Player target = plugin.getServer().getPlayer(targetName);
@@ -89,8 +99,11 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                     }
                 });
         }).exceptionally(ex -> {
-            sender.sendMessage("§c执行命令时出错: " + ex.getMessage());
-            plugin.getLogger().warning("Ban command error: " + ex.getMessage());
+            sender.sendMessage("§c执行命令时出错: ");
+            if(RapidBan.instance.getSimpleConfig().isDebug){
+                sender.sendMessage(ex.getMessage());
+            }
+            RapidBan.instance.logger.warning("Ban command error: " + ex.getMessage());
             return null;
         });
 

@@ -1,6 +1,9 @@
 package net.chen.rapidBan.commands;
 
 import net.chen.rapidBan.RapidBan;
+import net.chen.rapidBan.core.events.PlayerUnBannedEvent;
+import net.chen.rapidBan.models.Player;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -40,6 +43,8 @@ public class UnbanCommand implements CommandExecutor, TabCompleter {
 
             plugin.getPunishmentManager().unbanPlayer(targetUuid, sender.getName()).thenAccept(success -> {
                 if (success) {
+                    PlayerUnBannedEvent playerUnBannedEvent = new PlayerUnBannedEvent((Player) Bukkit.getPlayer(targetUuid));
+                    playerUnBannedEvent.callEvent();
                     sender.sendMessage("§a成功解封玩家 " + targetName);
                     plugin.getServer().broadcast(
                         net.kyori.adventure.text.Component.text("§a" + targetName + " §7已被 §a" + sender.getName() + " §7解封"),
