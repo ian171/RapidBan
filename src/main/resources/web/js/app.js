@@ -49,6 +49,8 @@ document.querySelectorAll('.nav-menu a').forEach(link => {
 
         if (pageName === 'dashboard') {
             loadDashboard();
+        } else if (pageName === 'punishments') {
+            loadAllPunishments();
         }
     });
 });
@@ -311,6 +313,92 @@ function formatDuration(ms) {
     if (minutes > 0) return `${minutes}分钟`;
     return `${seconds}秒`;
 }
+
+// 处罚记录页面
+let allPunishments = [];
+
+async function loadAllPunishments() {
+    const container = document.getElementById('allPunishmentsList');
+    container.innerHTML = '<p class="loading">加载中...</p>';
+
+    // 由于后端没有获取所有处罚的API，我们使用仪表盘的数据作为示例
+    const recentData = await apiRequest('/api/stats/recent');
+
+    if (recentData && recentData.recent) {
+        allPunishments = recentData.recent;
+        displayAllPunishments(allPunishments);
+    } else {
+        container.innerHTML = '<p class="loading">暂无处罚记录</p>';
+    }
+}
+
+function displayAllPunishments(punishments) {
+    const container = document.getElementById('allPunishmentsList');
+
+    if (punishments.length === 0) {
+        container.innerHTML = '<p class="loading">暂无处罚记录</p>';
+        return;
+    }
+
+    const table = `
+        <table>
+            <thead>
+                <tr>
+                    <th>玩家</th>
+                    <th>类型</th>
+                    <th>原因</th>
+                    <th>执行者</th>
+                    <th>时间</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${punishments.map(p => `
+                    <tr>
+                        <td>${p.playerName || p.playerUuid || '未知'}</td>
+                        <td>${getPunishmentTypeText(p.type)}</td>
+                        <td>${p.reason || '无'}</td>
+                        <td>${p.issuerName || p.issuerUuid || '系统'}</td>
+                        <td>${formatDate(p.createdAt)}</td>
+                        <td><span class="punishment-status status-${p.status || 'active'}">${getStatusText(p.status || 'ACTIVE')}</span></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = table;
+}
+
+// 处罚记录搜索和筛选
+document.getElementById('searchPunishmentsBtn').addEventListener('click', () => {
+    const searchQuery = document.getElementById('punishmentSearch').value.trim().toLowerCase();
+    const typeFilter = document.getElementById('punishmentTypeFilter').value;
+    const statusFilter = document.getElementById('punishmentStatusFilter').value;
+
+    let filtered = allPunishments;
+
+    // 按玩家名称或UUID搜索
+    if (searchQuery) {
+        filtered = filtered.filter(p => {
+            const playerName = (p.playerName || '').toLowerCase();
+            const playerUuid = (p.playerUuid || '').toLowerCase();
+            return playerName.includes(searchQuery) || playerUuid.includes(searchQuery);
+        });
+    }
+
+    // 按类型筛选
+    if (typeFilter) {
+        filtered = filtered.filter(p => p.type === typeFilter);
+    }
+
+    // 按状态筛选
+    if (statusFilter) {
+        filtered = filtered.filter(p => (p.status || 'active').toLowerCase() === statusFilter);
+    }
+
+    displayAllPunishments(filtered);
+});
 
 // 初始加载
 loadDashboard();

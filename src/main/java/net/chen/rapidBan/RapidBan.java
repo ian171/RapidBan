@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
+import java.sql.SQLOutput;
 import java.sql.Statement;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -45,12 +46,18 @@ public final class RapidBan extends JavaPlugin {
 
     private String serverId;
     public static RapidBan instance;
-    public Logger logger;
+    public static Logger logger;
+
+    @Override
+    public void onLoad() {
+        System.out.println("Loaded RapidBan with "+ Bukkit.getName());
+        System.out.println("If there are any problems, please send them to Github:)");
+    }
 
     @Override
     public void onEnable() {
-        logger = this.getLogger();
         instance = this;
+        logger = this.getLogger();
         saveDefaultConfig();
         simpleConfig =  new SimpleConfig(instance);
 

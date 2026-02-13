@@ -1,5 +1,6 @@
 package net.chen.rapidBan.database;
 
+import lombok.Getter;
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.enums.SyncEventType;
 import net.chen.rapidBan.models.SyncEvent;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class SyncRepository {
+    @Getter
     private final RapidBan plugin;
     private final DatabaseManager database;
 

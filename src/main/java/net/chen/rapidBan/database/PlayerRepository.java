@@ -2,6 +2,7 @@ package net.chen.rapidBan.database;
 
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.models.Player;
+import org.jspecify.annotations.NonNull;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,14 +23,7 @@ public class PlayerRepository {
 
     public CompletableFuture<Void> createOrUpdatePlayer(Player player) {
         return database.executeAsyncVoid(conn -> {
-            String sql;
-            if (isSQLite) {
-                sql = "INSERT INTO rb_players (uuid, username, first_join, last_join, last_ip) VALUES (?, ?, ?, ?, ?) " +
-                      "ON CONFLICT(uuid) DO UPDATE SET username = excluded.username, last_join = excluded.last_join, last_ip = excluded.last_ip";
-            } else {
-                sql = "INSERT INTO rb_players (uuid, username, first_join, last_join, last_ip) VALUES (?, ?, ?, ?, ?) " +
-                      "ON DUPLICATE KEY UPDATE username = ?, last_join = ?, last_ip = ?";
-            }
+            String sql = getString();
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, player.getUuid());
@@ -47,6 +41,18 @@ public class PlayerRepository {
                 stmt.executeUpdate();
             }
         });
+    }
+
+    private @NonNull String getString() {
+        String sql;
+        if (isSQLite) {
+            sql = "INSERT INTO rb_players (uuid, username, first_join, last_join, last_ip) VALUES (?, ?, ?, ?, ?) " +
+                  "ON CONFLICT(uuid) DO UPDATE SET username = excluded.username, last_join = excluded.last_join, last_ip = excluded.last_ip";
+        } else {
+            sql = "INSERT INTO rb_players (uuid, username, first_join, last_join, last_ip) VALUES (?, ?, ?, ?, ?) " +
+                  "ON DUPLICATE KEY UPDATE username = ?, last_join = ?, last_ip = ?";
+        }
+        return sql;
     }
 
     public CompletableFuture<Optional<Player>> getPlayer(String uuid) {
@@ -76,6 +82,24 @@ public class PlayerRepository {
                 }
             }
             return Optional.empty();
+        });
+    }
+
+    public CompletableFuture<Optional<Player>> getPlayerByUUID(String uuid) {
+        return getPlayer(uuid);
+    }
+
+    public CompletableFuture<Integer> getTotalPlayersCount() {
+        return database.executeAsync(conn -> {
+            String sql = "SELECT COUNT(*) FROM rb_players";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
         });
     }
 

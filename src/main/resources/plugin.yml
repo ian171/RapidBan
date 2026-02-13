@@ -4,7 +4,7 @@ main: net.chen.rapidBan.RapidBan
 api-version: '1.21'
 author: Chen
 description: 企业级 Minecraft 惩罚管理系统
-
+load: POSTWORLD
 commands:
   ban:
     description: 封禁玩家

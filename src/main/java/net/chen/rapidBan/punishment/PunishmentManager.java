@@ -105,7 +105,7 @@ public class PunishmentManager {
         repository.checkExpiredPunishments().thenRun(() -> {
             activeBanCache.entrySet().removeIf(entry -> {
                 if (entry.getValue().isExpired()) {
-                    plugin.getLogger().info("Removed expired ban for " + entry.getKey());
+                    // 日志已移除 - 避免控制台输出封禁信息
                     return true;
                 }
                 return false;

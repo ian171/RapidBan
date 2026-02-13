@@ -129,6 +129,66 @@ public class PunishmentRepository {
         });
     }
 
+    public CompletableFuture<List<Punishment>> getRecentPunishments(int limit) {
+        return database.executeAsync(conn -> {
+            String sql = "SELECT * FROM rb_punishments ORDER BY created_at DESC LIMIT ?";
+            List<Punishment> punishments = new ArrayList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, limit);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        punishments.add(mapPunishment(rs));
+                    }
+                }
+            }
+            return punishments;
+        });
+    }
+
+    public CompletableFuture<Integer> getTotalPunishmentsCount() {
+        return database.executeAsync(conn -> {
+            String sql = "SELECT COUNT(*) FROM rb_punishments";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
+        });
+    }
+
+    public CompletableFuture<Integer> getActiveBansCount() {
+        return database.executeAsync(conn -> {
+            String sql = "SELECT COUNT(*) FROM rb_punishments WHERE type IN ('BAN', 'TEMPBAN') AND active = TRUE AND revoked = FALSE";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
+        });
+    }
+
+    public CompletableFuture<Integer> getTodayPunishmentsCount() {
+        return database.executeAsync(conn -> {
+            long todayStart = System.currentTimeMillis() - (System.currentTimeMillis() % 86400000);
+            String sql = "SELECT COUNT(*) FROM rb_punishments WHERE created_at >= ?";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setLong(1, todayStart);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
+        });
+    }
+
     private Punishment mapPunishment(ResultSet rs) throws SQLException {
         Punishment punishment = new Punishment();
         punishment.setId(rs.getLong("id"));

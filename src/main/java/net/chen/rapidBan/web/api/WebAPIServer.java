@@ -3,13 +3,16 @@ package net.chen.rapidBan.web.api;
 import com.google.gson.Gson;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import net.chen.rapidBan.models.Player;
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.enums.PunishmentType;
 import net.chen.rapidBan.web.JWTManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class WebAPIServer {
     private final RapidBan plugin;
@@ -109,29 +112,39 @@ public class WebAPIServer {
     private void getPunishmentHistory(Context ctx) {
         String playerName = ctx.pathParam("player");
 
-        plugin.getPlayerRepository().getPlayerByName(playerName).thenAccept(optPlayer -> {
+        try {
+            var optPlayer = plugin.getPlayerRepository().getPlayerByName(playerName).join();
             if (optPlayer.isEmpty()) {
                 ctx.status(404).json(Map.of("error", "Player not found"));
                 return;
             }
 
             String uuid = optPlayer.get().getUuid();
-            plugin.getPunishmentManager().getPunishmentHistory(uuid).thenAccept(punishments -> {
-                ctx.json(punishments);
-            });
-        });
+            var punishments = plugin.getPunishmentManager().getPunishmentHistory(uuid).join();
+
+            // 构建返回数据，包含玩家名称
+            Map<String, Object> response = new HashMap<>();
+            response.put("punishments", punishments);
+            response.put("playerName", optPlayer.get().getUsername());
+
+            ctx.json(response);
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error getting punishment history: " + e.getMessage());
+            ctx.status(500).json(Map.of("error", "Failed to get punishment history"));
+        }
     }
 
     private void createBan(Context ctx) {
-        Map<String, Object> body = ctx.bodyAsClass(Map.class);
-        String playerName = (String) body.get("player");
-        String reason = (String) body.get("reason");
-        Long duration = body.containsKey("duration") ? ((Number) body.get("duration")).longValue() : null;
-        boolean silent = body.containsKey("silent") && (boolean) body.get("silent");
+        try {
+            Map<String, Object> body = ctx.bodyAsClass(Map.class);
+            String playerName = (String) body.get("player");
+            String reason = (String) body.get("reason");
+            Long duration = body.containsKey("duration") ? ((Number) body.get("duration")).longValue() : null;
+            boolean silent = body.containsKey("silent") && (boolean) body.get("silent");
 
-        String operator = ctx.attribute("username");
+            String operator = ctx.attribute("username");
 
-        plugin.getPlayerRepository().getPlayerByName(playerName).thenAccept(optPlayer -> {
+            var optPlayer = plugin.getPlayerRepository().getPlayerByName(playerName).join();
             if (optPlayer.isEmpty()) {
                 ctx.status(404).json(Map.of("error", "Player not found"));
                 return;
@@ -140,78 +153,138 @@ public class WebAPIServer {
             String uuid = optPlayer.get().getUuid();
             PunishmentType type = duration != null ? PunishmentType.TEMPBAN : PunishmentType.BAN;
 
-            plugin.getPunishmentManager().punishPlayer(uuid, type, reason, "WEB", operator, duration, silent)
-                .thenAccept(punishment -> {
-                    ctx.json(Map.of("success", true, "punishment", punishment));
-                });
-        });
+            var punishment = plugin.getPunishmentManager().punishPlayer(uuid, type, reason, "WEB", operator, duration, silent).join();
+            ctx.json(Map.of("success", true, "punishment", punishment));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error creating ban: " + e.getMessage());
+            ctx.status(500).json(Map.of("error", "Failed to create ban"));
+        }
     }
 
     private void unbanPlayer(Context ctx) {
-        Map<String, String> body = ctx.bodyAsClass(Map.class);
-        String playerName = body.get("player");
-        String operator = ctx.attribute("username");
+        try {
+            Map<String, String> body = ctx.bodyAsClass(Map.class);
+            String playerName = body.get("player");
+            String operator = ctx.attribute("username");
 
-        plugin.getPlayerRepository().getPlayerByName(playerName).thenAccept(optPlayer -> {
+            var optPlayer = plugin.getPlayerRepository().getPlayerByName(playerName).join();
             if (optPlayer.isEmpty()) {
                 ctx.status(404).json(Map.of("error", "Player not found"));
                 return;
             }
 
             String uuid = optPlayer.get().getUuid();
-            plugin.getPunishmentManager().unbanPlayer(uuid, operator).thenAccept(success -> {
-                ctx.json(Map.of("success", success));
-            });
-        });
+            boolean success = plugin.getPunishmentManager().unbanPlayer(uuid, operator).join();
+            ctx.json(Map.of("success", success));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error unbanning player: " + e.getMessage());
+            ctx.status(500).json(Map.of("error", "Failed to unban player"));
+        }
     }
 
     private void revokePunishments(Context ctx) {
-        Map<String, String> body = ctx.bodyAsClass(Map.class);
-        String playerName = body.get("player");
-        String reason = body.getOrDefault("reason", "Web撤销");
-        String operator = ctx.attribute("username");
+        try {
+            Map<String, String> body = ctx.bodyAsClass(Map.class);
+            String playerName = body.get("player");
+            String reason = body.getOrDefault("reason", "Web撤销");
+            String operator = ctx.attribute("username");
 
-        plugin.getPlayerRepository().getPlayerByName(playerName).thenAccept(optPlayer -> {
+            var optPlayer = plugin.getPlayerRepository().getPlayerByName(playerName).join();
             if (optPlayer.isEmpty()) {
                 ctx.status(404).json(Map.of("error", "Player not found"));
                 return;
             }
 
             String uuid = optPlayer.get().getUuid();
-            plugin.getPunishmentManager().revokeAllPunishments(uuid, operator, reason).thenAccept(success -> {
-                ctx.json(Map.of("success", success));
-            });
-        });
+            boolean success = plugin.getPunishmentManager().revokeAllPunishments(uuid, operator, reason).join();
+            ctx.json(Map.of("success", success));
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error revoking punishments: " + e.getMessage());
+            ctx.status(500).json(Map.of("error", "Failed to revoke punishments"));
+        }
     }
 
     private void searchPlayer(Context ctx) {
-        String query = ctx.pathParam("query");
+        try {
+            String query = ctx.pathParam("query");
 
-        plugin.getPlayerRepository().getPlayerByName(query).thenAccept(optPlayer -> {
+            var optPlayer = plugin.getPlayerRepository().getPlayerByName(query).join();
             if (optPlayer.isPresent()) {
                 ctx.json(Map.of("player", optPlayer.get()));
             } else {
                 ctx.status(404).json(Map.of("error", "Player not found"));
             }
-        });
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error searching player: " + e.getMessage());
+            ctx.status(500).json(Map.of("error", "Failed to search player"));
+        }
     }
 
     private void getAltAccounts(Context ctx) {
-        String uuid = ctx.pathParam("uuid");
+        try {
+            String uuid = ctx.pathParam("uuid");
 
-        plugin.getIPRepository().getIPsByUUID(uuid).thenAccept(ipRecords -> {
+            var ipRecords = plugin.getIPRepository().getIPsByUUID(uuid).join();
             ctx.json(Map.of("alts", ipRecords));
-        });
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error getting alt accounts: " + e.getMessage());
+            ctx.status(500).json(Map.of("error", "Failed to get alt accounts"));
+        }
     }
 
     private void getRecentPunishments(Context ctx) {
-        // 简化实现，返回模拟数据
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("total", 0);
-        stats.put("active", 0);
-        stats.put("today", 0);
-        stats.put("players", 0);
-        stats.put("recent", List.of());
-        ctx.json(stats);
+        try {
+            // 同步获取所有数据
+            int total = plugin.getPunishmentRepository().getTotalPunishmentsCount().join();
+            int active = plugin.getPunishmentRepository().getActiveBansCount().join();
+            int today = plugin.getPunishmentRepository().getTodayPunishmentsCount().join();
+            int players = plugin.getPlayerRepository().getTotalPlayersCount().join();
+            List<net.chen.rapidBan.models.Punishment> punishments = plugin.getPunishmentRepository().getRecentPunishments(10).join();
+
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("total", total);
+            stats.put("active", active);
+            stats.put("today", today);
+            stats.put("players", players);
+
+            List<Map<String, Object>> recentList = new ArrayList<>();
+
+            for (net.chen.rapidBan.models.Punishment p : punishments) {
+                Map<String, Object> punishmentMap = new HashMap<>();
+                punishmentMap.put("id", p.getId());
+                punishmentMap.put("playerUuid", p.getUuid());
+                punishmentMap.put("type", p.getType().name());
+                punishmentMap.put("reason", p.getReason());
+                punishmentMap.put("issuerName", p.getOperatorName());
+                punishmentMap.put("issuerUuid", p.getOperator());
+                punishmentMap.put("createdAt", p.getCreatedAt());
+                punishmentMap.put("expiresAt", p.getExpiresAt());
+                punishmentMap.put("duration", p.getExpiresAt() != null ? p.getExpiresAt() - p.getCreatedAt() : null);
+
+                String status = "active";
+                if (p.isRevoked()) {
+                    status = "revoked";
+                } else if (p.isExpired()) {
+                    status = "expired";
+                } else if (!p.isActive()) {
+                    status = "expired";
+                }
+                punishmentMap.put("status", status);
+
+                // 同步获取玩家名称
+                plugin.getPlayerRepository().getPlayerByUUID(p.getUuid()).thenAccept(optPlayer -> {
+                    optPlayer.ifPresent(player -> punishmentMap.put("playerName", player.getUsername()));
+                }).join();
+
+                recentList.add(punishmentMap);
+            }
+
+            stats.put("recent", recentList);
+            ctx.json(stats);
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error getting recent punishments: " + e.getMessage());
+            e.printStackTrace();
+            ctx.status(500).json(Map.of("error", "Failed to get statistics: " + e.getMessage()));
+        }
     }
 }

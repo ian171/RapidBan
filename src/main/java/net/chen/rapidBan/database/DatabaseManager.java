@@ -2,6 +2,7 @@ package net.chen.rapidBan.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.Getter;
 import net.chen.rapidBan.RapidBan;
 
 import java.io.File;
@@ -16,6 +17,7 @@ public class DatabaseManager {
     private final RapidBan plugin;
     private HikariDataSource dataSource;
     private final ExecutorService executor;
+    @Getter
     private DatabaseType databaseType;
 
     public enum DatabaseType {
@@ -34,15 +36,19 @@ public class DatabaseManager {
     public CompletableFuture<Boolean> initialize() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String dbTypeStr = plugin.getConfig().getString("database.type", "MYSQL").toUpperCase();
+                String dbTypeStr = plugin.getConfig().getString("database.type", "SQLITE").toUpperCase();
                 databaseType = DatabaseType.valueOf(dbTypeStr);
 
                 HikariConfig config = new HikariConfig();
 
                 if (databaseType == DatabaseType.SQLITE) {
                     initializeSQLite(config);
-                } else {
-                    initializeMySQL(config);
+                } else {//在遇到mysql问题的时候自动切换sqlite
+                    try {
+                        initializeMySQL(config);
+                    } catch (Exception e) {
+                        initializeSQLite(config);
+                    }
                 }
 
                 dataSource = new HikariDataSource(config);
@@ -138,10 +144,6 @@ public class DatabaseManager {
             plugin.getLogger().info("Database connection pool closed");
         }
         executor.shutdown();
-    }
-
-    public DatabaseType getDatabaseType() {
-        return databaseType;
     }
 
     @FunctionalInterface

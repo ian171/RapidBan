@@ -3,7 +3,6 @@ package net.chen.rapidBan.core;
 import lombok.Getter;
 import lombok.ToString;
 import net.chen.rapidBan.RapidBan;
-import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
 @ToString

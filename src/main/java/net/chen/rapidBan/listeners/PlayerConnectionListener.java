@@ -3,6 +3,7 @@ package net.chen.rapidBan.listeners;
 import net.chen.rapidBan.RapidBan;
 import net.chen.rapidBan.models.Player;
 import net.chen.rapidBan.models.Punishment;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,7 +29,7 @@ public class PlayerConnectionListener implements Listener {
                 String kickMessage = plugin.getKickScreenManager().generateKickScreen(ban, username);
                 event.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_BANNED,
-                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(kickMessage)
+                    MiniMessage.miniMessage().deserialize(kickMessage)
                 );
             }
         }).join();
@@ -36,13 +37,17 @@ public class PlayerConnectionListener implements Listener {
         Player player = new Player(uuid, username, System.currentTimeMillis(), ipAddress);
         plugin.getPlayerRepository().createOrUpdatePlayer(player);
     }
-
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         org.bukkit.entity.Player player = event.getPlayer();
         String uuid = player.getUniqueId().toString();
         String username = player.getName();
-        String ipAddress = player.getAddress().getAddress().getHostAddress();
+        String ipAddress = null;
+        try {
+            ipAddress = player.getAddress().getAddress().getHostAddress();
+        } catch (NullPointerException ignored) {
+            RapidBan.logger.warning("无法获取IP地址，请检查并怀疑🤨该玩家："+player);
+        }
 
         plugin.getIPManager().recordLogin(uuid, username, ipAddress);
 

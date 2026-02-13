@@ -55,7 +55,7 @@ public class SyncManager {
         event.setPunishmentId(punishmentId);
 
         syncRepository.createSyncEvent(event).thenAccept(id -> {
-            plugin.getLogger().info("Broadcasted sync event: " + eventType + " for " + targetUuid);
+            // 日志已移除 - 避免控制台输出封禁信息
         }).exceptionally(ex -> {
             plugin.getLogger().warning("Failed to broadcast sync event: " + ex.getMessage());
             return null;
@@ -63,7 +63,7 @@ public class SyncManager {
     }
 
     private void processEvent(SyncEvent event) {
-        plugin.getLogger().info("Processing sync event: " + event.getEventType() + " for " + event.getTargetUuid());
+        // 日志已移除 - 避免控制台输出封禁信息
 
         switch (event.getEventType()) {
             case BAN:
